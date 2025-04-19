@@ -22,10 +22,14 @@ const int MOD = 1000000007;
 void yes() { cout << "YES" << endl; }
 void no() { cout << "NO" << endl; }
 void ne() { cout << -1 << endl; }
-template <typename T> void log(const std::vector<T> &vec) {
+template <typename T> void log(const vector<T> &vec) {
   for (const auto &val : vec)
-    std::cout << val << ' ';
-  std::cout << '\n';
+    cout << val << ' ';
+  cout << '\n';
+}
+template <typename T> void inp(vector<T> &vec) {
+  for (auto &val : vec)
+    cin >> val;
 }
 
 /*-----------------------------------------------------------------------------*/
