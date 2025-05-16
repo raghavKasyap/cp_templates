@@ -3,7 +3,7 @@
 using namespace std;
 
 const int INF = 1e9;
-const int MOD = 1000000007;
+const int MOD = 1000000007; // 998244353
 
 #define fastIO                                                                 \
   ios::sync_with_stdio(false);                                                 \
