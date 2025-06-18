@@ -57,11 +57,13 @@ ll range_sum(int l, int r) {
       l += 1 << i;
     }
   }
+
+  return sum;
 }
 
 // range min query
-ll f_mn(ll a, ll b) { return min(a, b); }
-ll range_max(int l, int r) {
+ll f_min(ll a, ll b) { return min(a, b); }
+ll range_min(int l, int r) {
   int len = r - l + 1;
   int x = floor(log2(len));
 
