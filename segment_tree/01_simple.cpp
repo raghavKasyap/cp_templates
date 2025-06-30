@@ -34,6 +34,15 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
+/*
+  ref -
+  https://cp-algorithms.com/data_structures/segment_tree.html#simplest-form-of-a-segment-tree
+
+  Segment Tree
+  - query the sum of elements in range a[l....r] - o(log(n))
+  - handling changing values using assignement (a[i] = x) - o(log(n))
+*/
+
 const int MAXN = 1e6;
 int n, tree[4 * MAXN];
 
@@ -44,30 +53,34 @@ void build(int a[], int v, int tl, int tr) {
     int tm = (tl + tr) / 2;
     build(a, v * 2, tl, tm);
     build(a, v * 2 + 1, tm + 1, tr);
-    tree[v] = 0;
+    tree[v] = tree[v * 2] + tree[v * 2 + 1];
   }
 }
 
-// add value to range a[l....r]
-void update(int v, int tl, int tr, int l, int r, int add) {
+// range query
+int sum(int v, int tl, int tr, int l, int r) {
   if (l > r)
-    return;
+    return 0;
+
   if (l == tl && r == tr) {
-    tree[v] += add;
+    return tree[v];
+  }
+
+  int tm = (tl + tr) / 2;
+  return sum(v * 2, tl, tm, l, min(r, tm)) +
+         sum(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r);
+}
+
+// point update
+void update(int v, int tl, int tr, int pos, int new_val) {
+  if (tl == tr) {
+    tree[v] = new_val;
   } else {
     int tm = (tl + tr) / 2;
-    update(v * 2, tl, tm, l, min(r, tm), add);
-    update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, add);
+    if (pos <= tm)
+      update(v * 2, tl, tm, pos, new_val);
+    else
+      update(v * 2 + 1, tm + 1, tr, pos, new_val);
+    tree[v] = tree[v * 2] + tree[v * 2 + 1];
   }
-}
-
-// get a[i]
-int get(int v, int tl, int tr, int pos) {
-  if (tl == tr)
-    return tree[v];
-  int tm = (tl + tr) / 2;
-  if (pos <= tm)
-    return tree[v] + get(v * 2, tl, tm, pos);
-  else
-    return tree[v] + get(v * 2 + 1, tm + 1, tr, pos);
 }

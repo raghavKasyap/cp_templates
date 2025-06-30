@@ -34,8 +34,21 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
+/*
+  ref -
+  https://cp-algorithms.com/data_structures/segment_tree.html#assignment-on-segments
+
+  - Modification query asks to assign each element of a certain segment
+    a[l....r] to some value p - update()
+  - Query to read value at a[i] -
+
+
+
+*/
+
 const int MAXN = 1e6;
 int n, tree[4 * MAXN];
+bool marked[4 * MAXN];
 
 void build(int a[], int v, int tl, int tr) {
   if (tl == tr) {
@@ -44,34 +57,44 @@ void build(int a[], int v, int tl, int tr) {
     int tm = (tl + tr) / 2;
     build(a, v * 2, tl, tm);
     build(a, v * 2 + 1, tm + 1, tr);
-    tree[v] = tree[v * 2] + tree[v * 2 + 1];
+    tree[v] = 0;
   }
 }
 
-// range query
-int sum(int v, int tl, int tr, int l, int r) {
-  if (l > r)
-    return 0;
+// lazy push function which passes the computation to children
+// tree[v] and marked[v] together will mean that value can be push down
+// and this push happens on need basis
+void push(int v) {
+  if (marked[v]) {
+    tree[v * 2] = tree[v * 2 + 1] = tree[v];
+    marked[v * 2] = marked[v * 2 + 1] = true;
+    marked[v] = false;
+  }
+}
 
-  if (l == tl && r == tr) {
+void update(int v, int tl, int tr, int l, int r, int new_val) {
+  if (l > r)
+    return;
+  if (l == tl && tr == r) {
+    tree[v] = new_val;
+    marked[v] = true;
+  } else {
+    push(v);
+    int tm = (tl + tr) / 2;
+    update(v * 2, tl, tm, l, min(r, tm), new_val);
+    update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, new_val);
+  }
+}
+
+int get(int v, int tl, int tr, int pos) {
+  if (tl == tr) {
     return tree[v];
   }
 
+  push(v);
   int tm = (tl + tr) / 2;
-  return sum(v * 2, tl, tm, l, min(r, tm)) +
-         sum(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r);
-}
-
-// point update
-void update(int v, int tl, int tr, int pos, int new_val) {
-  if (tl == tr) {
-    tree[v] = new_val;
-  } else {
-    int tm = (tl + tr) / 2;
-    if (pos <= tm)
-      update(v * 2, tl, tm, pos, new_val);
-    else
-      update(v * 2 + 1, tm + 1, tr, pos, new_val);
-    tree[v] = tree[v * 2] + tree[v * 2 + 1];
-  }
+  if (pos <= tm)
+    return get(v * 2, tl, tm, pos);
+  else
+    return get(v * 2 + 1, tm + 1, tr, pos);
 }

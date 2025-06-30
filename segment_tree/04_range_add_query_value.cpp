@@ -34,34 +34,59 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
+/*
+  ref -
+  https://cp-algorithms.com/data_structures/segment_tree.html#addition-on-segments
+
+  - Modification query should add a number x to all numbers in the segment
+    a[l...r] - update()
+  - Query for value of any index - get()
+
+  - doesn't contain any lazy propration, the update function just goes through
+    and updates each node in the segment tree
+  
+  - the value stored at each node is initially zero and the new value which
+    updates a segment is added to root of subtree containing those elements
+  
+    - the get function takes care of adding the values from root to i based on
+    values at each nodes in the path
+*/
+
 const int MAXN = 1e6;
-int n;
-vector<int> tree[4 * MAXN];
+int n, tree[4 * MAXN];
 
 void build(int a[], int v, int tl, int tr) {
   if (tl == tr) {
-    tree[v] = vector<int>(1, a[tl]);
+    tree[v] = a[tl];
   } else {
     int tm = (tl + tr) / 2;
     build(a, v * 2, tl, tm);
     build(a, v * 2 + 1, tm + 1, tr);
-    merge(tree[v * 2].begin(), tree[v * 2].end(), tree[v * 2 + 1].begin(),
-          tree[v * 2 + 1].end(), back_inserter(tree[v]));
+    tree[v] = 0;
   }
 }
 
-int query(int v, int tl, int tr, int l, int r, int x) {
+// add value to range a[l....r]
+void update(int v, int tl, int tr, int l, int r, int add) {
   if (l > r)
-    return INF;
+    return;
 
   if (l == tl && r == tr) {
-    vector<int>::iterator pos = lower_bound(tree[v].begin(), tree[v].end(), x);
-    if (pos != tree[v].end())
-      return *pos;
-    return INF;
+    tree[v] += add;
+  } else {
+    int tm = (tl + tr) / 2;
+    update(v * 2, tl, tm, l, min(r, tm), add);
+    update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, add);
   }
+}
 
+// get a[i]
+int get(int v, int tl, int tr, int pos) {
+  if (tl == tr)
+    return tree[v];
   int tm = (tl + tr) / 2;
-  return min(query(v * 2, tl, tm, l, min(r, tm), x),
-             query(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, x));
+  if (pos <= tm)
+    return tree[v] + get(v * 2, tl, tm, pos);
+  else
+    return tree[v] + get(v * 2 + 1, tm + 1, tr, pos);
 }

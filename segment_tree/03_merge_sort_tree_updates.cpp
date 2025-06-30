@@ -34,57 +34,65 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
+/*
+  ref -
+  https://cp-algorithms.com/data_structures/segment_tree.html#find-the-smallest-number-greater-or-equal-to-a-specified-number-with-modification-queries
+
+  Find the smallest number greater or equal to a specified number. With
+  modification queries
+
+  - Construction TC - O(nlog^2(n)) - merging 2 multisets (R-B Trees)
+  - Query TC - O(log^2(n))
+*/
+
 const int MAXN = 1e6;
-int n, tree[4 * MAXN], a[MAXN];
-int lazy[4 * MAXN]; // has the value to be added to children
+int n;
+multiset<int> tree[4 * MAXN];
+int a[MAXN];
 
 void build(int a[], int v, int tl, int tr) {
   if (tl == tr) {
-    tree[v] = a[tl];
+    multiset<int> cur;
+    cur.insert(a[tl]);
+
+    tree[v] = cur;
   } else {
     int tm = (tl + tr) / 2;
     build(a, v * 2, tl, tm);
     build(a, v * 2 + 1, tm + 1, tr);
-    tree[v] = max(tree[v * 2], tree[v * 2 + 1]);
+    merge(tree[v * 2].begin(), tree[v * 2].end(), tree[v * 2 + 1].begin(),
+          tree[v * 2 + 1].end(), back_inserter(tree[v]));
   }
 }
 
-void push(int v) {
-  tree[v * 2] += lazy[v];
-  lazy[v * 2] += lazy[v];
-  tree[v * 2 + 1] += lazy[v];
-  lazy[v * 2 + 1] += lazy[v];
-  lazy[v] = 0;
-}
-
-void update(int v, int tl, int tr, int l, int r, int addend) {
+// range query - find the smallest element greater than x
+int query(int v, int tl, int tr, int l, int r, int x) {
   if (l > r)
-    return;
+    return INF;
 
-  if (l == tl && tr == r) {
-    tree[v] += addend;
-    lazy[v] += addend;
-  } else {
-    push(v); // push only when required
-
-    int tm = (tl + tr) / 2;
-    update(v * 2, tl, tm, l, min(r, tm), addend);
-    update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, addend);
-    tree[v] = max(tree[v * 2], tree[v * 2 + 1]);
+  if (l == tl && r == tr) {
+    auto pos = tree[v].lower_bound(x);
+    if (pos != tree[v].end())
+      return *pos;
+    return INF;
   }
-}
 
-int query(int v, int tl, int tr, int l, int r) {
-  if (l > r)
-    return -INF;
-
-  if (l == tl && tr == r)
-    return tree[v];
-
-  push(v);
-
-  // this logic remains exactly the same
   int tm = (tl + tr) / 2;
-  return max(query(v * 2, tl, tm, l, min(r, tm)),
-             query(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r));
+  return min(query(v * 2, tl, tm, l, min(r, tm), x),
+             query(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, x));
+}
+
+// point update
+void update(int v, int tl, int tr, int pos, int new_val) {
+  tree[v].erase(tree[v].find(a[pos]));
+  tree[v].insert(new_val);
+  if (tl != tr) {
+    int tm = (tl + tr) / 2;
+    if (pos <= tm)
+      update(v * 2, tl, tm, pos, new_val);
+    else
+      update(v * 2 + 1, tm + 1, tr, pos, new_val);
+  } else {
+    a[pos] = new_val;
+  }
 }

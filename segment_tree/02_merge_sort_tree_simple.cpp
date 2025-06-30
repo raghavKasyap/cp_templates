@@ -34,53 +34,46 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
+/*
+  ref -
+  https://cp-algorithms.com/data_structures/segment_tree.html#saving-the-entire-subarrays-in-each-vertex
+
+  Segment Tree
+  - Merge Sort Tree -> storing the entire subsegment in sorted order
+  - using stl merge aglorithm to build the tree
+
+  - Space complexity - O(nlogn) (non-trivial)
+  - Query Processing TC - O(log^2(n))
+*/
+
 const int MAXN = 1e6;
-int n, tree[4 * MAXN];
-bool marked[4 * MAXN];
+int n;
+vector<int> tree[4 * MAXN];
 
 void build(int a[], int v, int tl, int tr) {
   if (tl == tr) {
-    tree[v] = a[tl];
+    tree[v] = vector<int>(1, a[tl]);
   } else {
     int tm = (tl + tr) / 2;
     build(a, v * 2, tl, tm);
     build(a, v * 2 + 1, tm + 1, tr);
-    tree[v] = 0;
+    merge(tree[v * 2].begin(), tree[v * 2].end(), tree[v * 2 + 1].begin(),
+          tree[v * 2 + 1].end(), back_inserter(tree[v]));
   }
 }
 
-// lazy push function which passes the computation to children
-void push(int v) {
-  if (marked[v]) {
-    tree[v * 2] = tree[v * 2 + 1] = tree[v];
-    marked[v * 2] = marked[v * 2 + 1] = true;
-    marked[v] = false;
-  }
-}
-
-void update(int v, int tl, int tr, int l, int r, int new_val) {
+int query(int v, int tl, int tr, int l, int r, int x) {
   if (l > r)
-    return;
-  if (l == tl && tr == r) {
-    tree[v] = new_val;
-    marked[v] = true;
-  } else {
-    push(v);
-    int tm = (tl + tr) / 2;
-    update(v * 2, tl, tm, l, min(r, tm), new_val);
-    update(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, new_val);
-  }
-}
+    return INF;
 
-int get(int v, int tl, int tr, int pos) {
-  if (tl == tr) {
-    return tree[v];
+  if (l == tl && r == tr) {
+    vector<int>::iterator pos = lower_bound(tree[v].begin(), tree[v].end(), x);
+    if (pos != tree[v].end())
+      return *pos;
+    return INF;
   }
 
-  push(v);
   int tm = (tl + tr) / 2;
-  if (pos <= tm)
-    return get(v * 2, tl, tm, pos);
-  else
-    return get(v * 2 + 1, tm + 1, tr, pos);
+  return min(query(v * 2, tl, tm, l, min(r, tm), x),
+             query(v * 2 + 1, tm + 1, tr, max(l, tm + 1), r, x));
 }
