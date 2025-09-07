@@ -46,13 +46,13 @@ template <typename T> void inp(vector<T> &vec) {
 const int MAXN = 1e6;
 int n, tree[4 * MAXN];
 
-void build(int a[], int v, int tl, int tr) {
-  if (tl == tr) {
-    tree[v] = a[tl];
+void build(int a[], int v, int l, int r) {
+  if (l == r) {
+    tree[v] = a[l];
   } else {
-    int tm = (tl + tr) / 2;
-    build(a, v * 2, tl, tm);
-    build(a, v * 2 + 1, tm + 1, tr);
+    int tm = (l + r) / 2;
+    build(a, v * 2, l, tm);
+    build(a, v * 2 + 1, tm + 1, r);
     tree[v] = tree[v * 2] + tree[v * 2 + 1];
   }
 }

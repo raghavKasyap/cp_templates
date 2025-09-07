@@ -1,24 +1,24 @@
 #include <bits/stdc++.h>
-
 using namespace std;
-
-const int INF = 1e9;
-const int MOD = 1000000007; // 998244353
 
 #define fastIO                                                                 \
   ios::sync_with_stdio(false);                                                 \
   cin.tie(NULL);                                                               \
   cout.tie(NULL);                                                              \
   cout.precision(numeric_limits<double>::max_digits10);
-#define ll long long
-#define ull unsigned long long
-#define ld long double
-#define lcm(a, b) (a / __gcd(a, b) * b)
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define setbits(n) __builtin_popcountll(n)
-#define bitsize(n) (63 - __builtin_clzll(n))
-#define yn(a) cout << ((a) ? "YES\n" : "NO\n")
+
+// clang-format off
+#define ll              long long
+#define ull             unsigned long long
+#define ld              long double
+#define lcm(a, b)       (a / __gcd(a, b) * b)
+#define all(x)          (x).begin(), (x).end()
+#define rall(x)         (x).rbegin(), (x).rend()
+#define setbits(n)      __builtin_popcountll(n)
+#define bitsize(n)      (63 - __builtin_clzll(n))
+#define yn(a)           cout << ((a) ? "YES\n" : "NO\n")
+// clang-format on
+
 void yes() { cout << "YES" << endl; }
 void no() { cout << "NO" << endl; }
 void ne() { cout << -1 << endl; }
@@ -32,12 +32,20 @@ template <typename T> void inp(vector<T> &vec) {
     cin >> val;
 }
 
+const int INF = 1e9;
+const int MOD = 1000000007; // 998244353
+
 /*-----------------------------------------------------------------------------*/
 
 void solve() {}
 
 int main() {
   fastIO;
+#ifndef ONLINE_JUDGE
+  freopen("input.txt", "r", stdin);
+  freopen("output.txt", "w", stdout);
+  freopen("debug.txt", "w", stderr);
+#endif
 
   int t;
   // t = 1;

@@ -34,61 +34,32 @@ template <typename T> void inp(vector<T> &vec) {
 
 /*-----------------------------------------------------------------------------*/
 
-/*
+const int N = 1e5 + 5;
+int n;
+vector<int> centroids;
+vector<int> tree[N];
+int sz[N], parent[N];
 
-O(NlogN) - for preprocessing the tree, and then  
-O(logN)  - for each LCA query.
-O(NlogN) - space for the up array
-*/
+void dfs(int u, int pu = -1) {
+  sz[u] = 1;
+  parent[u] = pu;
+  bool is_centroid = true;
 
-int n, L;
-vector<vector<int>> adj;
-
-int timer;
-vector<int> tin, tout;  // to figure ancestor relationship
-vector<vector<int>> up; // find any ancestor in O(logN)
-
-void dfs(int v, int p) {
-  tin[v] = ++timer;
-  up[v][0] = p;
-
-  // implementation of up is very good
-  for (int i = 1; i <= L; ++i)
-    up[v][i] = up[up[v][i - 1]][i - 1];
-
-  for (int u : adj[v]) {
-    if (u != p)
-      dfs(u, v);
+  for (int v : tree[u]) {
+    if (v == pu)
+      continue;
+    dfs(v, u);
+    sz[u] += sz[v];
+    if (sz[v] > n / 2) {
+      is_centroid = false;
+    }
   }
 
-  tout[v] = ++timer;
-}
-
-bool is_ancestor(int u, int v) {
-  return tin[u] <= tin[v] && tout[u] >= tout[v];
-}
-
-int lca(int u, int v) {
-  if (is_ancestor(u, v))
-    return u;
-
-  if (is_ancestor(v, u))
-    return v;
-
-  // finding the top most node that is not an ancestor of v
-  for (int i = L; i >= 0; --i) {
-    if (!is_ancestor(up[u][i], v))
-      u = up[u][i];
+  if (pu != -1 && n - sz[u] > n / 2) {
+    is_centroid = false;
   }
 
-  return up[u][0];
-}
-
-void preprocess(int root) {
-  tin.resize(n);
-  tout.resize(n);
-  timer = 0;
-  L = ceil(log2(n));
-  up.assign(n, vector<int>(L + 1));
-  dfs(root, root);
+  if (is_centroid) {
+    centroids.push_back(u);
+  }
 }
